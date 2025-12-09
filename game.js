@@ -1,144 +1,142 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+// UI elements
 const startScreen = document.getElementById("startScreen");
 const deathScreen = document.getElementById("deathScreen");
 const unlockScreen = document.getElementById("unlockScreen");
-
 const finalScoreText = document.getElementById("finalScore");
 const unlockCodeText = document.getElementById("theCode");
 
-// Resize canvas to fill page
-function resizeCanvas() {
+// Resize full-screen
+function resize() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 }
-resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
+resize();
+window.addEventListener("resize", resize);
 
-// --- GAME VARIABLES ---
-let birdY, birdVelocity, pipes, score, gameRunning;
+// Game variables
+let running = false;
+let birdY, birdVel, pipes, score, frame;
+const gravity = 0.45;
 
-// Unlock settings
-const unlockScore = 25;
-const redeemCode = "GTIC-SECRET-2025";
+// Code unlock settings
+const unlockAt = 25;
+const unlockCode = "GTIC-2025-SPECIAL";
 
-// --- RESET GAME VALUES ---
-function resetGame() {
-    birdY = canvas.height / 2;
-    birdVelocity = 0;
+function reset() {
+    birdY = canvas.height * 0.4;
+    birdVel = 0;
     pipes = [];
     score = 0;
-    frameCount = 0;
+    frame = 0;
 }
 
-// --- START GAME ---
 function startGame() {
-    resetGame();
-    gameRunning = true;
+    reset();
+    running = true;
 
     startScreen.classList.add("hidden");
     deathScreen.classList.add("hidden");
     unlockScreen.classList.add("hidden");
 
-    requestAnimationFrame(loop);
+    loop();
 }
 
-// --- EVENTS ---
 function flap() {
-    if (!gameRunning) return;
-    birdVelocity = -9;
+    if (!running) return;
+    birdVel = -8.5;
 }
 
-document.addEventListener("keydown", e => {
-    if (startScreen.classList.contains("hidden") === false) startGame();
-    else if (unlockScreen.classList.contains("hidden") === false) startGame();
-    else if (deathScreen.classList.contains("hidden") === false) startGame();
+document.addEventListener("keydown", () => {
+    if (!running) startGame();
     else flap();
 });
 
 document.addEventListener("touchstart", () => {
-    if (startScreen.classList.contains("hidden") === false) startGame();
-    else if (unlockScreen.classList.contains("hidden") === false) startGame();
-    else if (deathScreen.classList.contains("hidden") === false) startGame();
+    if (!running) startGame();
     else flap();
 });
 
-let frameCount = 0;
-
+// Spawn pipes
 function spawnPipe() {
     const gap = canvas.height * 0.25;
-    const topHeight = Math.random() * (canvas.height * 0.5) + 100;
+    const top = Math.random() * (canvas.height * 0.5) + 100;
 
     pipes.push({
         x: canvas.width,
-        top: topHeight,
-        bottom: topHeight + gap
+        top,
+        bottom: top + gap,
+        scored: false
     });
 }
 
-function showDeathScreen() {
-    gameRunning = false;
+function showDeath() {
+    running = false;
     finalScoreText.textContent = "Score: " + score;
     deathScreen.classList.remove("hidden");
 }
 
-function showUnlockScreen() {
-    gameRunning = false;
-    unlockCodeText.textContent = redeemCode;
+function showUnlock() {
+    running = false;
+    unlockCodeText.textContent = unlockCode;
     unlockScreen.classList.remove("hidden");
 }
 
 function loop() {
-    if (!gameRunning) return;
+    if (!running) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw bird
-    birdVelocity += 0.45;
-    birdY += birdVelocity;
+    // Bird
+    birdVel += gravity;
+    birdY += birdVel;
 
     ctx.fillStyle = "#00ffee";
     ctx.beginPath();
-    ctx.arc(canvas.width * 0.25, birdY, 18, 0, Math.PI * 2);
+    ctx.arc(canvas.width * 0.25, birdY, 20, 0, Math.PI * 2);
     ctx.fill();
 
-    if (birdY > canvas.height || birdY < 0) return showDeathScreen();
+    if (birdY > canvas.height || birdY < 0) {
+        return showDeath();
+    }
 
     // Pipes
-    if (frameCount % 100 === 0) spawnPipe();
+    if (frame % 100 === 0) spawnPipe();
 
     pipes.forEach(pipe => {
         pipe.x -= 4;
 
         ctx.fillStyle = "#ff7b00";
-        ctx.fillRect(pipe.x, 0, 60, pipe.top);
-        ctx.fillRect(pipe.x, pipe.bottom, 60, canvas.height - pipe.bottom);
+        ctx.fillRect(pipe.x, 0, 70, pipe.top);
+        ctx.fillRect(pipe.x, pipe.bottom, 70, canvas.height - pipe.bottom);
+
+        const bx = canvas.width * 0.25;
 
         // Collision
-        const birdX = canvas.width * 0.25;
         if (
-            pipe.x < birdX + 18 &&
-            pipe.x + 60 > birdX - 18 &&
+            bx + 20 > pipe.x &&
+            bx - 20 < pipe.x + 70 &&
             (birdY < pipe.top || birdY > pipe.bottom)
         ) {
-            return showDeathScreen();
+            return showDeath();
         }
 
-        // Scoring
-        if (pipe.x + 60 < birdX && !pipe.scored) {
+        // Score
+        if (!pipe.scored && pipe.x + 70 < bx) {
             score++;
             pipe.scored = true;
 
-            if (score === unlockScore) return showUnlockScreen();
+            if (score >= unlockAt) return showUnlock();
         }
     });
 
     // Score text
     ctx.fillStyle = "white";
-    ctx.font = "40px Inter";
-    ctx.fillText(score, 30, 60);
+    ctx.font = "50px Inter";
+    ctx.fillText(score, 40, 70);
 
-    frameCount++;
+    frame++;
     requestAnimationFrame(loop);
 }
