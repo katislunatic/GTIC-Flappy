@@ -5,7 +5,25 @@
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <canvas id="gameCanvas" width="400" height="600"></canvas>
+    <div id="startScreen" class="screen">
+        <h1>GTIC FLAPPY</h1>
+        <p>Tap or Press Space to Start</p>
+    </div>
+
+    <div id="deathScreen" class="screen hidden">
+        <h1>Game Over</h1>
+        <p id="finalScore"></p>
+        <p class="restart">Tap or Press Space to Restart</p>
+    </div>
+
+    <div id="unlockScreen" class="screen hidden">
+        <h1>🎉 GTIC CODE UNLOCKED! 🎉</h1>
+        <p>Redeem this in the GTIC Discord:</p>
+        <p id="theCode"></p>
+        <p class="restart">Tap or Press Space to Restart</p>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
 
     <script src="game.js"></script>
 </body>
