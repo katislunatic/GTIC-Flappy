@@ -1,26 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>GTIC Flappy</title>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="startScreen" class="screen">
-        <h1>GTIC FLAPPY</h1>
-        <p>Tap or Press Space to Start</p>
-    </div>
 
-    <div id="deathScreen" class="screen hidden">
-        <h1>Game Over</h1>
-        <p id="finalScore"></p>
-        <p class="restart">Tap or Press Space to Restart</p>
-    </div>
+    <div id="ui">
+        <div id="startScreen" class="screen">
+            <h1>GTIC FLAPPY</h1>
+            <p>Tap or Press Space to Start</p>
+        </div>
 
-    <div id="unlockScreen" class="screen hidden">
-        <h1>🎉 GTIC CODE UNLOCKED! 🎉</h1>
-        <p>Redeem this in the GTIC Discord:</p>
-        <p id="theCode"></p>
-        <p class="restart">Tap or Press Space to Restart</p>
+        <div id="deathScreen" class="screen hidden">
+            <h1>Game Over</h1>
+            <p id="finalScore"></p>
+            <p>Tap or Press Space to Restart</p>
+        </div>
+
+        <div id="unlockScreen" class="screen hidden">
+            <h1>🎉 CODE UNLOCKED 🎉</h1>
+            <p>Redeem this in the GTIC Discord:</p>
+            <p id="theCode" class="code"></p>
+            <p>Tap or Press Space to Restart</p>
+        </div>
     </div>
 
     <canvas id="gameCanvas"></canvas>
