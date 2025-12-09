@@ -1,14 +1,12 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// UI elements
 const startScreen = document.getElementById("startScreen");
 const deathScreen = document.getElementById("deathScreen");
 const unlockScreen = document.getElementById("unlockScreen");
 const finalScoreText = document.getElementById("finalScore");
 const unlockCodeText = document.getElementById("theCode");
 
-// Resize full-screen
 function resize() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -16,14 +14,12 @@ function resize() {
 resize();
 window.addEventListener("resize", resize);
 
-// Game variables
 let running = false;
 let birdY, birdVel, pipes, score, frame;
-const gravity = 0.45;
 
-// Code unlock settings
+const gravity = 0.45;
 const unlockAt = 25;
-const unlockCode = "GTIC-2025-SPECIAL";
+const unlockCode = "GTIC-2025";
 
 function reset() {
     birdY = canvas.height * 0.4;
@@ -33,20 +29,23 @@ function reset() {
     frame = 0;
 }
 
+function showScreen(screen) {
+    startScreen.classList.remove("visible");
+    deathScreen.classList.remove("visible");
+    unlockScreen.classList.remove("visible");
+
+    screen.classList.add("visible");
+}
+
 function startGame() {
-    reset();
     running = true;
-
-    startScreen.classList.add("hidden");
-    deathScreen.classList.add("hidden");
-    unlockScreen.classList.add("hidden");
-
+    reset();
+    showScreen(document.createElement("div")); // hide all
     loop();
 }
 
 function flap() {
-    if (!running) return;
-    birdVel = -8.5;
+    if (running) birdVel = -8.5;
 }
 
 document.addEventListener("keydown", () => {
@@ -59,7 +58,6 @@ document.addEventListener("touchstart", () => {
     else flap();
 });
 
-// Spawn pipes
 function spawnPipe() {
     const gap = canvas.height * 0.25;
     const top = Math.random() * (canvas.height * 0.5) + 100;
@@ -75,13 +73,13 @@ function spawnPipe() {
 function showDeath() {
     running = false;
     finalScoreText.textContent = "Score: " + score;
-    deathScreen.classList.remove("hidden");
+    showScreen(deathScreen);
 }
 
 function showUnlock() {
     running = false;
     unlockCodeText.textContent = unlockCode;
-    unlockScreen.classList.remove("hidden");
+    showScreen(unlockScreen);
 }
 
 function loop() {
@@ -114,7 +112,6 @@ function loop() {
 
         const bx = canvas.width * 0.25;
 
-        // Collision
         if (
             bx + 20 > pipe.x &&
             bx - 20 < pipe.x + 70 &&
@@ -123,16 +120,16 @@ function loop() {
             return showDeath();
         }
 
-        // Score
         if (!pipe.scored && pipe.x + 70 < bx) {
             score++;
             pipe.scored = true;
 
-            if (score >= unlockAt) return showUnlock();
+            if (score === unlockAt) {
+                return showUnlock();
+            }
         }
     });
 
-    // Score text
     ctx.fillStyle = "white";
     ctx.font = "50px Inter";
     ctx.fillText(score, 40, 70);
@@ -140,3 +137,6 @@ function loop() {
     frame++;
     requestAnimationFrame(loop);
 }
+
+// show start screen at load
+showScreen(startScreen);
